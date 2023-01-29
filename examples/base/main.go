@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/pocketbase/pocketbase/plugins/cloudcode"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,6 +35,22 @@ func main() {
 		"automigrate",
 		true,
 		"enable/disable auto migrations",
+	)
+
+	var cloudCodeDir string
+	app.RootCmd.PersistentFlags().StringVar(
+		&cloudCodeDir,
+		"cloudCodeDir",
+		defaultCloudCodeDir(),
+		"the directory to use for cloud code",
+	)
+
+	var cloudCodeInit string
+	app.RootCmd.PersistentFlags().StringVar(
+		&cloudCodeInit,
+		"cloudCodeInit",
+		"main.tengo",
+		"the name of the main cloud code script to load",
 	)
 
 	var publicDir string
@@ -70,6 +87,9 @@ func main() {
 		Dir:          migrationsDir,
 	})
 
+	// register cloud code.
+	cloudcode.MustRegister(app, cloudCodeDir, cloudCodeInit)
+
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDir), indexFallback))
@@ -88,4 +108,12 @@ func defaultPublicDir() string {
 		return "./pb_public"
 	}
 	return filepath.Join(os.Args[0], "../pb_public")
+}
+
+func defaultCloudCodeDir() string {
+	if strings.HasPrefix(os.Args[0], os.TempDir()) {
+		// most likely ran with go run
+		return "./pb_cloudcode"
+	}
+	return filepath.Join(os.Args[0], "../pb_cloudcode")
 }
