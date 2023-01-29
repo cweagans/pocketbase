@@ -1,4 +1,5 @@
 export {
-    meta: import("pb.meta"),
-    events: import("pb.events")
+    database: import("pb.database"),
+    events: import("pb.events"),
+    meta: import("pb.meta")
 }

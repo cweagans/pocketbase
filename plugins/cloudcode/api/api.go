@@ -16,8 +16,9 @@ func GetModules() *tengo.ModuleMap {
 	// Important: make sure that each of these modules are registered in pb.tengo.
 	// Otherwise, users won't be able to do pb.modulename.functionname() as expected.
 	// TODO: There is probably some way to programmatically register each of these under the pb module.
-	mm.AddBuiltinModule("pb.meta", metaModule)
+	mm.AddBuiltinModule("pb.database", databaseModule)
 	mm.AddBuiltinModule("pb.events", eventsModule)
+	mm.AddBuiltinModule("pb.meta", metaModule)
 
 	return mm
 }
