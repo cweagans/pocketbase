@@ -4,7 +4,6 @@ import (
 	"github.com/d5/tengo/v2"
 	"github.com/d5/tengo/v2/parser"
 	"github.com/d5/tengo/v2/stdlib"
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/cloudcode/api"
 	"log"
@@ -46,11 +45,9 @@ func Register(app core.App, dir string, init string) error {
 		return err
 	}
 
-	modules := getModuleMap()
+	modules := getModuleMap(&app)
 	symbolTable := getSymbolTable()
-
-	// TODO: Add any other constants needed by cloud code.
-	constants := []tengo.Object{&tengo.String{Value: pocketbase.Version}}
+	constants := []tengo.Object{}
 
 	bytecode, err := compile(modules, src, init, symbolTable, constants)
 	if err != nil {
@@ -66,14 +63,15 @@ func Register(app core.App, dir string, init string) error {
 	return nil
 }
 
-func getModuleMap() *tengo.ModuleMap {
+func getModuleMap(app *core.App) *tengo.ModuleMap {
 	// Enable all stdlib tengo modules except os.
 	// Cloud code shouldn't be able to start other programs until we have better sandboxing.
+	// TODO: also consider how to do outgoing http requests. something like https://gitlab.com/Ma_124/httpbox maybe?
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	modules.Remove("os")
 
 	// Add the modules that are specific to the pocketbase cloud code system.
-	modules.AddMap(api.GetModules())
+	modules.AddMap(api.GetModules(app))
 
 	return modules
 }

@@ -1,5 +1,5 @@
 export {
-    database: import("pb.database"),
+    dao: import("pb.dao"),
     events: import("pb.events"),
     meta: import("pb.meta")
 }
